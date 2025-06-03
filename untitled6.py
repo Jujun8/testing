@@ -16,9 +16,7 @@ import pandas as pd
 
 import streamlit as st
 import pandas as pd
-# Anda mungkin perlu mengimpor library lain seperti scikit-learn, tensorflow, pytorch, dll.
-# import your_machine_learning_library as ml_lib
-df = pd.read_csv("shopee_review_stemming_ok.csv")
+
 
 # --- Judul Aplikasi ---
 st.title("Aplikasi Prediksi Rating")
