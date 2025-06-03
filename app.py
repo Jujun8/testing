@@ -1,9 +1,6 @@
+import streamlit as st
 
-import ipywidgets as widgets
-from IPython.display import display, clear_output
-
-
-# Dummy data for demonstration
+# Dummy data review
 customer_reviews = [
     {"product": "Product A", "review": "Sangat puas dengan produk ini!"},
     {"product": "Product B", "review": "Barang cepat sampai, kualitas bagus."},
@@ -12,7 +9,7 @@ customer_reviews = [
     {"product": "Product B", "review": "Mantap!"},
 ]
 
-# Function to simulate sentiment analysis (very basic)
+# Fungsi analisis sentimen sederhana
 def analyze_sentiment(review):
     review_lower = review.lower()
     if "puas" in review_lower or "bagus" in review_lower or "mantap" in review_lower:
@@ -22,75 +19,56 @@ def analyze_sentiment(review):
     else:
         return "Netral"
 
-# Function to display reviews for a specific product
-def display_product_reviews(product_name):
-    clear_output(wait=True)
-    print(f"Review untuk {product_name}:")
-    found_reviews = False
-    for review_data in customer_reviews:
-        if review_data["product"] == product_name:
-            sentiment = analyze_sentiment(review_data["review"])
-            print(f"- {review_data['review']} (Sentimen: {sentiment})")
-            found_reviews = True
-    if not found_reviews:
-        print("Belum ada review untuk produk ini.")
-    display(widgets.Button(description="Kembali ke Halaman Utama", on_click=lambda b: display_main_page()))
+# Buat halaman utama
+def main_page():
+    st.title("📊 Analisis Kepuasan Pelanggan Shopee")
+    st.subheader("Berdasarkan Review")
 
-# Function to display the main page
-def display_main_page():
-    clear_output(wait=True)
-    print("Halaman Utama: Analisis Kepuasan Pelanggan Shopee (Berdasarkan Review)")
+    st.write(f"**Total Review:** {len(customer_reviews)}")
 
-    # Total Reviews
-    total_reviews = len(customer_reviews)
-    print(f"\nTotal Review: {total_reviews}")
+    # Hitung distribusi sentimen
+    sentiments = [analyze_sentiment(r['review']) for r in customer_reviews]
+    positif = sentiments.count("Positif")
+    negatif = sentiments.count("Negatif")
+    netral = sentiments.count("Netral")
 
-    # Sentiment Distribution
-    positive_count = 0
-    negative_count = 0
-    neutral_count = 0
-    for review_data in customer_reviews:
-        sentiment = analyze_sentiment(review_data["review"])
-        if sentiment == "Positif":
-            positive_count += 1
-        elif sentiment == "Negatif":
-            negative_count += 1
-        else:
-            neutral_count += 1
+    st.write("### Distribusi Sentimen")
+    st.bar_chart({"Sentimen": {"Positif": positif, "Negatif": negatif, "Netral": netral}})
 
-    print(f"\nDistribusi Sentimen:")
-    print(f"- Positif: {positive_count}")
-    print(f"- Negatif: {negative_count}")
-    print(f"- Netral: {neutral_count}")
+    st.write("### Pilih Produk untuk Melihat Review")
+    unique_products = sorted(set([r["product"] for r in customer_reviews]))
+    selected_product = st.selectbox("Pilih Produk", unique_products)
 
-    # Product-wise Review Links
-    print("\nPilih Produk untuk Melihat Review:")
-    unique_products = sorted(list(set([review["product"] for review in customer_reviews])))
+    if st.button("Lihat Review"):
+        show_product_reviews(selected_product)
 
-    for product in unique_products:
-        button = widgets.Button(description=product)
-        button.on_click(lambda b, prod=product: display_product_reviews(prod))
-        display(button)
+# Halaman review produk tertentu
+def show_product_reviews(product_name):
+    st.write(f"## Review untuk {product_name}")
+    found = False
+    for r in customer_reviews:
+        if r['product'] == product_name:
+            sentiment = analyze_sentiment(r['review'])
+            st.write(f"- {r['review']} (Sentimen: **{sentiment}**)") 
+            found = True
+    if not found:
+        st.write("Belum ada review untuk produk ini.")
 
-# Function to display the 'About' page
-def display_about_page():
-    clear_output(wait=True)
-    print("Halaman Tentang:")
-    print("Aplikasi sederhana untuk menganalisis kepuasan pelanggan Shopee berdasarkan review.")
-    print("Dibuat menggunakan Google Colaboratory/Jupyter Notebooks.")
-    print("Analisis sentimen yang digunakan sangat dasar dan hanya untuk demonstrasi.")
-    display(widgets.Button(description="Kembali ke Halaman Utama", on_click=lambda b: display_main_page()))
+# Halaman tentang
+def about_page():
+    st.title("📘 Tentang Aplikasi")
+    st.write("""
+    Aplikasi ini dibuat untuk menganalisis kepuasan pelanggan Shopee berdasarkan ulasan produk.
+    
+    - Dibuat dengan Streamlit
+    - Menggunakan analisis sentimen dasar (keyword-based)
+    - Hanya untuk keperluan demo/data mining sederhana
+    """)
 
-# Create navigation buttons
-main_button = widgets.Button(description="Halaman Utama")
-about_button = widgets.Button(description="Tentang")
+# Navigasi halaman
+page = st.sidebar.selectbox("Navigasi", ["Halaman Utama", "Tentang"])
 
-# Link buttons to their respective pages
-main_button.on_click(lambda b: display_main_page())
-about_button.on_click(lambda b: display_about_page())
-
-# Display the navigation buttons initially
-display(widgets.HBox([main_button, about_button]))
-
-# Display the main page on startup
-display_main_page()
+if page == "Halaman Utama":
+    main_page()
+elif page == "Tentang":
+    about_page()
