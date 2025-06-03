@@ -7,7 +7,7 @@ Original file is located at
     https://colab.research.google.com/drive/1R_0eGCY8D87SUTSLS295C2RNVhwjuUaO
 """
 
-df = pd.read_csv("shopee_review_stemming_ok.csv.zip")
+df = pd.read_csv("shopee_review_stemming_ok.csv")
 
 import pandas as pd
 
