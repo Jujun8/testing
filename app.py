@@ -4,7 +4,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 
 # Membaca data dari file Excel
-df = pd.read_excel("testing.xlsx")  # pastikan file ini berada di direktori kerja saat dijalankan
+df = pd.read_csv("shopee_review_stemming_ok.csv.zip")  # pastikan file ini berada di direktori kerja saat dijalankan
 
 
 # Train simple model
