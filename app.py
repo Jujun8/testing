@@ -3,18 +3,9 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 
-# Dummy data Shopee reviews
-customer_reviews = [
-    {"product": "Product A", "review": "Sangat puas dengan produk ini!", "label": "positif"},
-    {"product": "Product B", "review": "Barang cepat sampai, kualitas bagus.", "label": "positif"},
-    {"product": "Product A", "review": "Lumayan, tapi pengiriman agak lama.", "label": "netral"},
-    {"product": "Product C", "review": "Tidak sesuai deskripsi, sangat kecewa.", "label": "negatif"},
-    {"product": "Product B", "review": "Mantap!", "label": "positif"},
-    {"product": "Product C", "review": "Jelek banget, kecewa parah.", "label": "negatif"},
-]
+# Membaca data dari file Excel
+df = pd.read_excel("testing.xlsx")  # pastikan file ini berada di direktori kerja saat dijalankan
 
-# Convert to DataFrame
-df = pd.DataFrame(customer_reviews)
 
 # Train simple model
 def train_model():
