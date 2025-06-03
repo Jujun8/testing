@@ -8,7 +8,7 @@ import os
 @st.cache_data
 def load_data():
     try:
-        df = pd.read_csv("shopee_review_stemming_ok.csv")  # Pastikan file berada di folder yang sama dengan file app.py
+        df = pd.read_csv("shopee_review_stemming_ok.csv.zip")  # Pastikan file berada di folder yang sama dengan file app.py
         return df
     except Exception as e:
         st.error(f"Gagal membaca file Excel: {e}")
