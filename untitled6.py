@@ -10,8 +10,6 @@ Original file is located at
 
 import pandas as pd
 
-df = pd.read_csv('/content/drive/MyDrive/testing.csv')
-df.head(16)
 
 
 # prompt: berikan saya kode streamlit untuk memprediksi rating
