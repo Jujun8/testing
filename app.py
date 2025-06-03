@@ -1,74 +1,82 @@
 import streamlit as st
+import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
 
-# Dummy data review
+# Dummy data Shopee reviews
 customer_reviews = [
-    {"product": "Product A", "review": "Sangat puas dengan produk ini!"},
-    {"product": "Product B", "review": "Barang cepat sampai, kualitas bagus."},
-    {"product": "Product A", "review": "Lumayan, tapi pengiriman agak lama."},
-    {"product": "Product C", "review": "Tidak sesuai deskripsi, sangat kecewa."},
-    {"product": "Product B", "review": "Mantap!"},
+    {"product": "Product A", "review": "Sangat puas dengan produk ini!", "label": "positif"},
+    {"product": "Product B", "review": "Barang cepat sampai, kualitas bagus.", "label": "positif"},
+    {"product": "Product A", "review": "Lumayan, tapi pengiriman agak lama.", "label": "netral"},
+    {"product": "Product C", "review": "Tidak sesuai deskripsi, sangat kecewa.", "label": "negatif"},
+    {"product": "Product B", "review": "Mantap!", "label": "positif"},
+    {"product": "Product C", "review": "Jelek banget, kecewa parah.", "label": "negatif"},
 ]
 
-# Fungsi analisis sentimen sederhana
-def analyze_sentiment(review):
-    review_lower = review.lower()
-    if "puas" in review_lower or "bagus" in review_lower or "mantap" in review_lower:
-        return "Positif"
-    elif "kecewa" in review_lower or "tidak sesuai" in review_lower:
-        return "Negatif"
-    else:
-        return "Netral"
+# Convert to DataFrame
+df = pd.DataFrame(customer_reviews)
 
-# Buat halaman utama
-def main_page():
-    st.title("📊 Analisis Kepuasan Pelanggan Shopee")
-    st.subheader("Berdasarkan Review")
+# Train simple model
+def train_model():
+    vectorizer = TfidfVectorizer()
+    X = vectorizer.fit_transform(df['review'])
+    y = df['label']
+    model = LogisticRegression()
+    model.fit(X, y)
+    return model, vectorizer
 
-    st.write(f"**Total Review:** {len(customer_reviews)}")
+# Sentiment prediction
+def predict_sentiment(review_text, model, vectorizer):
+    X = vectorizer.transform([review_text])
+    prediction = model.predict(X)[0]
+    proba = model.predict_proba(X).max()
+    return prediction, proba
 
-    # Hitung distribusi sentimen
-    sentiments = [analyze_sentiment(r['review']) for r in customer_reviews]
-    positif = sentiments.count("Positif")
-    negatif = sentiments.count("Negatif")
-    netral = sentiments.count("Netral")
+# ---------- Streamlit UI ----------
+st.set_page_config(page_title="Dashboard Shopee Sentimen", layout="centered")
 
-    st.write("### Distribusi Sentimen")
-    st.bar_chart({"Sentimen": {"Positif": positif, "Negatif": negatif, "Netral": netral}})
+st.sidebar.title("📊 Navigasi Halaman")
+page = st.sidebar.radio("Pilih Halaman", ["Halaman Awal", "Pelatihan Model", "Prediksi Review"])
 
-    st.write("### Pilih Produk untuk Melihat Review")
-    unique_products = sorted(set([r["product"] for r in customer_reviews]))
-    selected_product = st.selectbox("Pilih Produk", unique_products)
-
-    if st.button("Lihat Review"):
-        show_product_reviews(selected_product)
-
-# Halaman review produk tertentu
-def show_product_reviews(product_name):
-    st.write(f"## Review untuk {product_name}")
-    found = False
-    for r in customer_reviews:
-        if r['product'] == product_name:
-            sentiment = analyze_sentiment(r['review'])
-            st.write(f"- {r['review']} (Sentimen: **{sentiment}**)") 
-            found = True
-    if not found:
-        st.write("Belum ada review untuk produk ini.")
-
-# Halaman tentang
-def about_page():
-    st.title("📘 Tentang Aplikasi")
-    st.write("""
-    Aplikasi ini dibuat untuk menganalisis kepuasan pelanggan Shopee berdasarkan ulasan produk.
+# ------- Page 1: Dataset & Statistik -------
+if page == "Halaman Awal":
+    st.title("🛒 Halaman Awal - Dataset Review Shopee")
     
-    - Dibuat dengan Streamlit
-    - Menggunakan analisis sentimen dasar (keyword-based)
-    - Hanya untuk keperluan demo/data mining sederhana
-    """)
+    st.subheader("📦 Dataset Review")
+    st.dataframe(df)
 
-# Navigasi halaman
-page = st.sidebar.selectbox("Navigasi", ["Halaman Utama", "Tentang"])
+    st.subheader("📈 Distribusi Sentimen")
+    sentiment_count = df['label'].value_counts()
+    st.bar_chart(sentiment_count)
 
-if page == "Halaman Utama":
-    main_page()
-elif page == "Tentang":
-    about_page()
+    st.subheader("📌 Produk Tersedia")
+    st.write(df['product'].unique())
+
+# ------- Page 2: Pelatihan Model -------
+elif page == "Pelatihan Model":
+    st.title("⚙️ Halaman Pelatihan Model")
+    st.write("Melatih model klasifikasi sentimen berdasarkan ulasan pelanggan...")
+
+    model, vectorizer = train_model()
+
+    st.success("✅ Model berhasil dilatih!")
+    st.subheader("🔍 Contoh Prediksi Otomatis")
+    for review in df['review']:
+        pred, _ = predict_sentiment(review, model, vectorizer)
+        st.write(f"- \"{review}\" → **{pred}**")
+
+# ------- Page 3: Form Prediksi Review -------
+elif page == "Prediksi Review":
+    st.title("📝 Halaman Prediksi Review")
+    st.write("Masukkan teks review pelanggan dan dapatkan prediksi sentimen.")
+
+    # Pastikan model sudah dilatih
+    model, vectorizer = train_model()
+
+    with st.form("form_prediksi"):
+        user_input = st.text_area("Masukkan Review Anda di Sini")
+        submitted = st.form_submit_button("Prediksi")
+
+        if submitted and user_input.strip():
+            pred, prob = predict_sentiment(user_input, model, vectorizer)
+            st.success(f"Prediksi Sentimen: **{pred.capitalize()}** (Probabilitas: {prob:.2f})")
