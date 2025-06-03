@@ -4,7 +4,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 
 # Membaca data dari file ZIP yang diunggah
-df = pd.read_csv("/mnt/data/shopee_review_stemming_ok.csv.zip")  # path file yang diunggah ke Streamlit
+df = pd.read_csv("/mnt/data/shopee_review_stemming_ok.csv")  # path file yang diunggah ke Streamlit
 
 # Train simple model
 def train_model():
