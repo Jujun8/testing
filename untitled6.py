@@ -15,7 +15,6 @@ import pandas as pd
 df = pd.read_csv('/content/drive/MyDrive/testing.csv')
 df.head(16)
 
-!pip install streamlit
 
 # prompt: berikan saya kode streamlit untuk memprediksi rating
 
